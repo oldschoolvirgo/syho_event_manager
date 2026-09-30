@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 
 test('invoice flow validates settings, escapes customer input, generates a PDF, and invalidates changed invoices',async()=>{
   const elements=new Map();
+  const html=readFileSync(new URL('./invoice/index.html',import.meta.url),'utf8').replace(/<!--[\s\S]*?-->/g,'');
+  const ids=new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(match=>match[1]));
   function element(id){if(!elements.has(id))elements.set(id,{value:'',checked:false,disabled:true,handlers:{},addEventListener(name,handler){this.handlers[name]=handler;},scrollIntoView(){}});return elements.get(id);}
   const keys=['name','city','phone','email','address','ein','zelle','venmo','cashapp','paypal'];
   const inputs=Object.fromEntries(keys.map(key=>[key,{value:''}]));
@@ -11,7 +14,7 @@ test('invoice flow validates settings, escapes customer input, generates a PDF, 
   globalThis.localStorage={getItem:()=>null,setItem:(key,value)=>{saved=value;}};
   const drawnFonts=[],drawnText=[];
   const context={scale(){},fillRect(){},fillText(text){drawnFonts.push(this.font);drawnText.push(text);},beginPath(){},moveTo(){},lineTo(){},stroke(){},measureText:value=>({width:value.length*6})};
-  globalThis.document={fonts:{load:async()=>[{}]},getElementById:element,createElement:()=>({getContext:()=>context,toDataURL:()=>`data:image/jpeg;base64,${Buffer.from([255,216,255,217]).toString('base64')}`})};
+  globalThis.document={fonts:{load:async()=>[{}]},getElementById:id=>ids.has(id)?element(id):null,createElement:()=>({getContext:()=>context,toDataURL:()=>`data:image/jpeg;base64,${Buffer.from([255,216,255,217]).toString('base64')}`})};
   let shared;
   Object.defineProperty(globalThis,'navigator',{configurable:true,value:{canShare:()=>true,share:async data=>{shared=data;}}});
   const fire=async(id,event)=>element(id).handlers[event]({preventDefault(){}});

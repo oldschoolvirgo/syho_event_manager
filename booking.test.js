@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {bookingAmounts, bookingBlocks, displayTime, durationLabel} from './booking-core.js';
 
 test('booking pricing includes travel, discounts, partial hours and overnight events', () => {
@@ -43,6 +44,8 @@ test('confirmation keeps policy wording and includes only enabled options', () =
 
 test('booking UI escapes client text, disables hidden fees, generates multipage PDF and invalidates edits', async () => {
   const elements = new Map();
+  const html = readFileSync(new URL('./booking-confirmation/index.html', import.meta.url), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+  const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]));
   function element(id) {
     if (!elements.has(id)) elements.set(id, {value:'', checked:false, disabled:true, handlers:{},
       addEventListener(name, handler) { this.handlers[name] = handler; },
@@ -52,7 +55,7 @@ test('booking UI escapes client text, disables hidden fees, generates multipage 
   }
   const drawn = [], fonts = [];
   const context = {scale(){}, fillRect(){}, fillText(text,x,y){assert.ok(y < 792); drawn.push(text); fonts.push(this.font);}, measureText:text=>({width:text.length * 5})};
-  globalThis.document = {getElementById:element, fonts:{load:async()=>[{}]}, createElement:()=>({getContext:()=>context, toDataURL:()=>`data:image/jpeg;base64,${Buffer.from([255,216,255,217]).toString('base64')}`})};
+  globalThis.document = {getElementById:id=>ids.has(id)?element(id):null, fonts:{load:async()=>[{}]}, createElement:()=>({getContext:()=>context, toDataURL:()=>`data:image/jpeg;base64,${Buffer.from([255,216,255,217]).toString('base64')}`})};
   let shared;
   Object.defineProperty(globalThis, 'navigator', {configurable:true, value:{canShare:()=>true, share:async data=>{shared=data;}}});
   const fire = async (id, event) => element(id).handlers[event]({preventDefault(){}});
