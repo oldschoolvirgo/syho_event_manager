@@ -2,6 +2,11 @@ import {RATE,invoiceAmounts,localDate,defaultNumber,displayDate,dueDate,money,pa
 const $=id=>document.getElementById(id);
 const fields=['name','city','phone','email','address','ein','zelle','venmo','cashapp','paypal'];
 const storageKey='syho-business-v1';
+const paymentTerms=[
+  'Payment is due at the conclusion of service unless other arrangements have been agreed upon in advance.',
+  'Unless otherwise agreed, all outstanding balances must be paid **no later than five (5) calendar days following the event**.',
+  "Alternative payment terms may be arranged in advance to accommodate the client's established billing or invoice-processing requirements."
+];
 let settings={}, generated=null, pdfFile=null, revision=0;
 const status=message=>{$('status').textContent=message;};
 try { const saved=JSON.parse(localStorage.getItem(storageKey)||'{}'); for(const key of fields) settings[key]=typeof saved?.[key]==='string'?saved[key]:''; } catch { status('Browser storage is unavailable. Settings will work for this session.'); }
@@ -24,7 +29,7 @@ function render(data){
     <table><thead><tr><th>DESCRIPTION</th><th class="numeric">HOURS</th><th class="numeric">RATE</th><th class="numeric">AMOUNT</th></tr></thead><tbody><tr><td>Karaoke Service</td><td class="numeric">${escape(data.hours||'—')}</td><td class="numeric">$100.00</td><td class="numeric">${subtotal}</td></tr></tbody></table>
     ${amounts?.discount>0?`<div class="discount-summary"><div><span>Subtotal</span><span>${subtotal}</span></div><div><span>Flat discount</span><span>−${money(amounts.discount)}</span></div></div>`:''}
     <div class="total"><span>Total due</span><strong>${total}</strong></div>
-    <div class="payment"><div class="invoice-label">Remittance information</div>${paymentLines(s).map(line=>`<p>${escape(line)}</p>`).join('')||'<p>Add your payment details in Settings.</p>'}</div><div class="terms">Total due in 5 days.</div>
+    <div class="payment"><div class="invoice-label">Remittance information</div>${paymentLines(s).map(line=>`<p>${escape(line)}</p>`).join('')||'<p>Add your payment details in Settings.</p>'}</div><div class="terms">${paymentTerms.map(paragraph=>`<p>${paragraph.split('**').map((part,i)=>i%2?`<strong>${escape(part)}</strong>`:escape(part)).join('')}</p>`).join('')}</div>
     <div class="invoice-footer"><strong>Thank you for your business!</strong><p>Please follow us on Instagram <a href="https://www.instagram.com/singyourheartouthtx/" target="_blank" rel="noopener">@singyourheartouthtx</a></p><p>We specialize in private parties and corporate events.</p></div>`;
   $('setup-hint').hidden=Boolean(settings.name);
 }
@@ -100,7 +105,31 @@ function makePdf(data){
     text(`Flat discount   −${money(amounts.discount)}`,{size:11,right:true});gap(8);
   }
   text(`Total due   ${money(amounts.total)}`,{size:23,color:'#251b38',bold:true,right:true});gap(20);
-  label('REMITTANCE INFORMATION');for(const line of paymentLines(data.settings))text(line,{size:10});gap();text('Total due in 5 days.',{size:10,color:'#251b38',bold:true});gap(24);
+  label('REMITTANCE INFORMATION');for(const line of paymentLines(data.settings))text(line,{size:10});gap();
+  for(const paragraph of paymentTerms){
+    const lines=[];let line=[],used=0;
+    for(const [index,part] of paragraph.split('**').entries()){
+      const bold=index%2===1;ctx.font=`${bold?'bold ':''}10px Inter`;
+      for(const word of part.split(/(\s+)/).filter(Boolean)){
+        const width=ctx.measureText(word).width;
+        if(used+width>524&&line.length){lines.push(line);line=[];used=0;}
+        if(!line.length&&!word.trim())continue;
+        line.push({word,width,bold});used+=width;
+      }
+    }
+    if(line.length)lines.push(line);
+    ensure(lines.length*15);
+    for(const segments of lines){
+      ensure(15);let x=44;
+      for(const segment of segments){
+        ctx.font=`${segment.bold?'bold ':''}10px Inter`;ctx.fillStyle='#251b38';ctx.textAlign='left';
+        ctx.fillText(segment.word,x,y+10);x+=segment.width;
+      }
+      y+=15;
+    }
+    gap(8);
+  }
+  gap(16);
   ensure(85);rule();text('Thank you for your business!',{size:13,color:'#251b38',bold:true});gap(6);text('Please follow us on Instagram @singyourheartouthtx',{size:10});text('We specialize in private parties and corporate events.',{size:10,color:'#655775'});
   finish();const safeName=data.number.replace(/[^a-zA-Z0-9_-]/g,'_')||'invoice';return new File([pdfBytes(pages)],`${safeName}.pdf`,{type:'application/pdf'});
 }

@@ -18,7 +18,9 @@ The preview server also supports `/syho-event-manager/` to check the same relati
 
 Primary contact, phone, event date, venue address, setup time, start time, and end time are required. Client/organization and venue name are optional. The hourly rate is fixed at $100.
 
-Scheduled time is calculated to the minute. An end time earlier than the start means the following day; identical start/end times are rejected. Estimated total is service duration × $100, minus the enabled flat discount, plus the enabled travel fee. Service cost rounds to cents. The total cannot be negative.
+Scheduled time is calculated to the minute. An end time earlier than the start means the following day; identical start/end times are rejected. Estimated total is service duration × $100, minus the enabled discount, plus the enabled travel fee. Service cost rounds to cents. The total cannot be negative.
+
+The optional deposit records an amount already paid. Balance Due appears when a deposit is entered and equals estimated total minus deposit. Deposits cannot exceed the estimated total. Turning the deposit off removes it and Balance Due from the document.
 
 The discount and travel toggles control both the displayed lines and the calculation. Turning an option off excludes its value, even if an amount was entered earlier. “Bring my own lyrics monitor” adds the agreed sentence that Sing Your Heart Out will provide a monitor; otherwise the line is omitted.
 

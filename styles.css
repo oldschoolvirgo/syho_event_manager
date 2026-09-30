@@ -85,3 +85,5 @@ h1{font-size:20px;margin:0;color:var(--wine)}
 @media print{.invoice-row{break-inside:avoid}.invoice-head{flex-direction:row}.invoice-title{text-align:right}}
 
 .discount-summary{margin:16px 0 0 auto;max-width:280px;font-size:12px;color:#655775}.discount-summary>div{display:flex;justify-content:space-between;gap:24px;margin:6px 0}
+
+.terms{font-weight:400}.terms p{margin:0 0 10px}

@@ -13,6 +13,8 @@ function draft() {
   for (const id of ['organization', 'contact', 'phone', 'date', 'venue', 'address', 'setup', 'start', 'end']) data[id] = $(id).value.trim();
   data.monitor = $('monitor').checked;
   data.includeDiscount = $('include-discount').checked;
+  data.includeDeposit = $('include-deposit').checked;
+  data.deposit = data.includeDeposit && $('deposit').value.trim() !== '' ? Number($('deposit').value) : null;
   data.includeTravel = $('include-travel').checked;
   data.discount = data.includeDiscount ? Number($('discount').value) : 0;
   data.travel = data.includeTravel ? Number($('travel').value) : 0;
@@ -20,6 +22,8 @@ function draft() {
 }
 function render(data, amounts) {
   $('estimate').textContent = amounts ? money(amounts.total) : '—';
+  $('balance-row').hidden = !data.includeDeposit || data.deposit === null;
+  $('balance').textContent = amounts ? money(amounts.balance) : '?';
   $('duration').textContent = `Scheduled hours: ${amounts ? durationLabel(amounts.minutes) + (amounts.overnight ? ' · Ends next day' : '') : '—'}`;
   const blocks = bookingBlocks(data, amounts);
   $('confirmation').innerHTML = blocks.map(block => {
@@ -36,7 +40,7 @@ function invalidate() {
   revision++; pdfFile = null;
   for (const id of ['save-pdf', 'share', 'print']) $(id).disabled = true;
   $('preview-state').textContent = 'PREVIEW';
-  for (const id of ['discount', 'travel']) {
+  for (const id of ['discount', 'travel', 'deposit']) {
     const enabled = $(`include-${id}`).checked;
     $(`${id}-field`).hidden = !enabled; $(id).disabled = !enabled;
     $(`include-${id}`).setAttribute('aria-expanded', String(enabled));
@@ -44,7 +48,7 @@ function invalidate() {
   for (const id of ['contact', 'phone', 'address', 'end', 'discount']) $(id).setCustomValidity('');
   const data = draft(); let amounts = null, error = '';
   if (data.start && data.end) {
-    try { amounts = bookingAmounts(data.start, data.end, data.discount, data.travel); }
+    try { amounts = bookingAmounts(data.start, data.end, data.discount, data.travel, data.deposit ?? 0); }
     catch (e) { error = e.message; }
   }
   render(data, amounts); status(error);
@@ -56,7 +60,7 @@ form.addEventListener('submit', async event => {
   for (const id of ['contact', 'phone', 'address']) $(id).setCustomValidity(data[id] ? '' : 'Please complete this field.');
   if (!form.reportValidity()) return;
   let amounts;
-  try { amounts = bookingAmounts(data.start, data.end, data.discount, data.travel); }
+  try { amounts = bookingAmounts(data.start, data.end, data.discount, data.travel, data.deposit ?? 0); }
   catch (error) { status(error.message); return; }
   const currentRevision = ++revision;
   pdfFile = null;

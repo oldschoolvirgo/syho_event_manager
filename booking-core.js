@@ -5,7 +5,7 @@ export function timeMinutes(value) {
   const [hour, minute] = value.split(':').map(Number);
   return hour * 60 + minute;
 }
-export function bookingAmounts(start, end, discount = 0, travel = 0) {
+export function bookingAmounts(start, end, discount = 0, travel = 0, deposit = 0) {
   const startMinutes = timeMinutes(start), endMinutes = timeMinutes(end);
   if (startMinutes === endMinutes) throw new RangeError('Start and end times must be different.');
   const minutes = (endMinutes - startMinutes + 1440) % 1440;
@@ -16,10 +16,13 @@ export function bookingAmounts(start, end, discount = 0, travel = 0) {
     return Math.round(value * 100);
   };
   const subtotalCents = Math.round(minutes * RATE * 100 / 60);
-  const discountCents = cents(discount, 'flat discount'), travelCents = cents(travel, 'travel fee');
-  if (discountCents > subtotalCents + travelCents) throw new RangeError('The flat discount cannot exceed the service amount plus travel fee.');
+  const discountCents = cents(discount, 'discount'), travelCents = cents(travel, 'travel fee');
+  if (discountCents > subtotalCents + travelCents) throw new RangeError('The discount cannot exceed the service amount plus travel fee.');
+  const totalCents = subtotalCents - discountCents + travelCents;
+  const depositCents = cents(deposit, 'deposit');
+  if (depositCents > totalCents) throw new RangeError('The deposit cannot exceed the estimated total.');
   return {minutes, hours: minutes / 60, overnight: endMinutes < startMinutes, subtotal: subtotalCents / 100,
-    discount: discountCents / 100, travel: travelCents / 100, total: (subtotalCents - discountCents + travelCents) / 100};
+    discount: discountCents / 100, travel: travelCents / 100, total: totalCents / 100, deposit: depositCents / 100, balance: (totalCents - depositCents) / 100};
 }
 export function displayTime(value) {
   if (!value) return '—';
@@ -37,27 +40,30 @@ export function bookingBlocks(data, amounts) {
   const p = text => blocks.push({kind:'paragraph', text});
   const heading = text => blocks.push({kind:'heading', text});
   const detail = (label, value, kind = 'detail') => blocks.push({kind, label, value: value || '—'});
-  blocks.push({kind:'brand', text:'SING YOUR ❤️‍🔥 OUT'}, {kind:'title', text:'Karaoke Service Booking Confirmation'});
+  blocks.push({kind:'brand', text:'Sing Your ❤️‍🔥 Out'}, {kind:'title', text:'Karaoke Service Booking Confirmation'});
   p('Thank you for choosing **Sing Your Heart Out**! This confirmation summarizes the details of your upcoming karaoke event and helps ensure that we are all on the same page before the event.');
   p('Please review the information below and let me know as soon as possible if any event details need to be corrected or changed.');
   p('By confirming this booking, we acknowledge that the event details, pricing, requirements, and policies below accurately reflect our understanding of the scheduled karaoke service.');
-  p('Thank you for choosing **Sing Your ❤️‍🔥 Out**. I look forward to making your event a great one!');
   heading('EVENT DETAILS');
-  detail('Client / Organization', data.organization);
+  if (data.organization?.trim()) detail('Client / Organization', data.organization.trim());
   detail('Primary Contact', data.contact);
   detail('Contact Phone', data.phone);
   detail('Event Date', data.date ? displayDate(data.date) : '—');
-  detail('Location / Venue', data.venue);
+  if (data.venue?.trim()) detail('Location / Venue', data.venue.trim());
   detail('Venue Address', data.address);
   if (data.monitor) detail('Lyrics Monitor', 'Sing Your Heart Out will provide a lyrics monitor for this event.');
-  detail('Setup / Access Time', displayTime(data.setup));
+  detail('Setup / Access Time', data.setup ? `${displayTime(data.setup)} - Setup and breakdown time are not included in scheduled service hours.` : displayTime(data.setup));
   detail('Start Time', displayTime(data.start));
   detail('End Time', `${displayTime(data.end)}${amounts?.overnight ? ' (next day)' : ''}`);
   detail('Scheduled Hours', amounts ? durationLabel(amounts.minutes) : '—');
   detail('Hourly Rate', money(RATE));
-  if (data.includeDiscount) detail('Flat Discount', amounts ? `−${money(amounts.discount)}` : '—');
+  if (data.includeDiscount) detail('Discount', amounts ? `−${money(amounts.discount)}` : '—');
   if (data.includeTravel) detail('Travel Fee', amounts ? money(amounts.travel) : '—');
   detail('Estimated Total', amounts ? money(amounts.total) : '—', 'total');
+  if (data.includeDeposit && data.deposit !== null) {
+    detail('Deposit', amounts ? money(amounts.deposit) : '?');
+    detail('Balance Due', amounts ? money(amounts.balance) : '?', 'total');
+  }
   heading('VENUE & SETUP REQUIREMENTS');
   p('The client or venue must provide:');
   blocks.push({kind:'list', items:['Reliable Wi-Fi internet access', 'Access to electrical outlet(s) reasonably close to the performance area', 'A suitable area for the safe setup and operation of karaoke equipment']});
@@ -68,19 +74,24 @@ export function bookingBlocks(data, amounts) {
   p('A song that begins before the scheduled end time will be allowed to finish without triggering an additional hour. Once the final song is complete, service concludes unless the client has approved an additional hour of service.');
   heading('EQUIPMENT & EVENT POLICY');
   p('Sing Your Heart Out uses professional audio, wireless microphones, computers, and related electronic equipment that is both valuable and sensitive.');
-  p("For the safety of guests and equipment, **Sing Your Heart Out does not provide karaoke services for children's parties or events where lots of children may be present.**");
+  p("For the safety of guests and equipment, **Sing Your Heart Out does not provide karaoke services for children's parties or events with a large number of children in attendance.**");
   p('The client and venue are asked to help provide a safe environment for the equipment and to prevent guests from intentionally mishandling, dropping, tampering with, or otherwise damaging equipment.');
   heading('PAYMENT');
   p('Payment is due at the conclusion of service unless other arrangements have been agreed upon in advance.');
-  p('All outstanding balances must be paid **no later than five (5) calendar days following the event**.');
+  p('Unless otherwise agreed, all outstanding balances must be paid **no later than five (5) calendar days following the event**.');
+  p("Alternative payment terms may be arranged in advance to accommodate the client's established billing or invoice-processing requirements.");
+  heading('PAYMENT METHODS');
+  p('Cash, Check, Zelle, Venmo, CashApp, PayPal');
   heading('CANCELLATIONS & RESCHEDULING');
-  p('Cancellations or requests to reschedule should be made **at least 24 hours before the scheduled start time**.');
-  p('Requests made at least 24 hours in advance may be rescheduled to another available date without penalty.');
-  p('**Any deposit paid toward the booking is non-refundable if the event is cancelled less than 24 hours before the scheduled start time.**');
-  p("Requests to reschedule with less than 24 hours' notice may require a new deposit. Any new event date is subject to availability.");
-  p('Any non-refundable expenses specifically incurred for the event may also remain the responsibility of the client.');
+  p('Cancellations or requests to reschedule should be made as soon as possible.');
+  p('**Cancellations made at least 48 hours before the scheduled start time are eligible for a full refund of any deposit paid toward the booking.**');
+  p('For cancellations made **less than 48 hours before the scheduled start time, deposits are non-refundable. However, the deposit may be transferred to a rescheduled event date at no additional charge.**');
+  p('Requests to reschedule are subject to availability, and the new event date must be mutually agreed upon.');
+  p('Any non-refundable expenses specifically incurred for the original event may remain the responsibility of the client.');
   heading('TRAVEL');
   p('Events requiring significant travel outside the normal service area may be subject to an additional travel fee.');
   p('Any applicable travel fee will be disclosed and agreed upon prior to confirmation of the booking and will be included in the estimated total above.');
+  heading('\u00A0');
+  p('Thank you for choosing **Sing Your ❤️‍🔥 Out**. I look forward to making your event a great one!');
   return blocks;
 }

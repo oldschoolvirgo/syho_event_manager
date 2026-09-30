@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -10,25 +11,33 @@
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="../hub.css">
 </head>
+
 <body>
-  <nav class="site-nav" aria-label="Main navigation">
+  <!-- <nav class="site-nav" aria-label="Main navigation">
     <a class="site-name" href="../">SYHO Event Manager</a>
-    <div><a href="../invoice/">Invoice</a><a href="../booking-confirmation/" aria-current="page">Booking confirmation</a></div>
-  </nav>
+    <div><a href="../invoice/">Invoice</a><a href="../booking-confirmation/" aria-current="page">Booking
+        confirmation</a></div>
+  </nav> -->
   <main>
     <div class="workspace">
       <section class="editor card booking-editor" aria-labelledby="form-title">
-        <div class="section-heading"><h1 id="form-title">Booking details</h1></div>
-        <p class="hint">Fields marked * are required. Review the preview, then generate your confirmation to save or share it.</p>
+        <div class="section-heading">
+          <h1 id="form-title">Booking details</h1>
+        </div>
+        <p class="hint">Fields marked * are required. Review the preview, then generate your confirmation to save or
+          share it.</p>
         <form id="booking-form">
-          <label>Client / Organization <small>Optional</small><input id="organization" maxlength="160" autocomplete="organization"></label>
+          <label>Client / Organization <small>Optional</small><input id="organization" maxlength="160"
+              autocomplete="organization"></label>
           <label>Primary Contact *<input id="contact" required maxlength="120" autocomplete="name"></label>
           <label>Contact Phone *<input id="phone" type="tel" required maxlength="60" autocomplete="tel"></label>
           <label>Event Date *<input id="date" type="date" required></label>
           <label>Location / Venue <small>Optional</small><input id="venue" maxlength="160"></label>
-          <label>Venue Address *<textarea id="address" required rows="3" maxlength="500" autocomplete="street-address"></textarea></label>
+          <label>Venue Address *<textarea id="address" required rows="3" maxlength="500"
+              autocomplete="street-address"></textarea></label>
           <div class="options"><label><input id="monitor" type="checkbox"> Bring my own lyrics monitor</label></div>
-          <p class="hint">Turn this on when the venue cannot provide a screen. The confirmation will state that Sing Your Heart Out will provide a lyrics monitor.</p>
+          <p class="hint">Turn this on when the venue cannot provide a screen. The confirmation will state that Sing
+            Your Heart Out will provide a lyrics monitor.</p>
           <label>Setup / Access Time *<input id="setup" type="time" required></label>
           <div class="field-pair">
             <label>Start Time *<input id="start" type="time" required></label>
@@ -37,27 +46,42 @@
           <p class="hint">An end time earlier than the start time means the event ends the next day.</p>
           <p class="booking-duration" id="duration" aria-live="polite">Scheduled hours: —</p>
           <label>Hourly Rate<input value="$100.00" readonly></label>
-          <div class="options"><label><input id="include-discount" type="checkbox" aria-controls="discount-field" aria-expanded="false"> Include flat discount</label></div>
-          <label id="discount-field" hidden>Flat Discount ($)<input id="discount" type="number" min="0" max="1000000" step="0.01" inputmode="decimal" value="0" disabled required></label>
-          <div class="options"><label><input id="include-travel" type="checkbox" aria-controls="travel-field" aria-expanded="false"> Include travel fee</label></div>
-          <label id="travel-field" hidden>Travel Fee ($)<input id="travel" type="number" min="0" max="1000000" step="0.01" inputmode="decimal" value="0" disabled required></label>
+          <div class="options"><label><input id="include-discount" type="checkbox" aria-controls="discount-field"
+                aria-expanded="false"> Include discount</label></div>
+          <label id="discount-field" hidden>Discount ($)<input id="discount" type="number" min="0" max="1000000"
+              step="0.01" inputmode="decimal" value="0" disabled required></label>
+          <div class="options"><label><input id="include-travel" type="checkbox" aria-controls="travel-field"
+                aria-expanded="false"> Include travel fee</label></div>
+          <label id="travel-field" hidden>Travel Fee ($)<input id="travel" type="number" min="0" max="1000000"
+              step="0.01" inputmode="decimal" value="0" disabled required></label>
+          <div class="options"><label><input id="include-deposit" type="checkbox" aria-controls="deposit-field"
+                aria-expanded="false"> Include deposit</label></div>
+          <label id="deposit-field" hidden>Deposit ($)<small>Amount paid toward this booking. Deducted from the
+              estimated total to calculate the balance due.</small><input id="deposit" type="number" min="0"
+              max="1000000" step="0.01" inputmode="decimal" placeholder="0.00" disabled required></label>
           <div class="estimate"><span>Estimated total</span><strong id="estimate" aria-live="polite">—</strong></div>
+          <div id="balance-row" class="estimate" hidden><span>Balance due</span><strong id="balance"
+              aria-live="polite">?</strong></div>
           <button class="primary" type="submit">Generate confirmation <span aria-hidden="true">↗</span></button>
         </form>
         <p id="status" role="status" aria-live="polite"></p>
         <p class="hint">Booking details reset when you reload or leave this page. Save your PDF for your records.</p>
       </section>
       <section id="preview-area" class="preview-area" aria-label="Booking confirmation preview">
-        <div class="preview-toolbar"><h2>Your confirmation</h2><span id="preview-state" class="badge">PREVIEW</span></div>
+        <div class="preview-toolbar" style="display: none;">
+          <h2>Your confirmation</h2><span id="preview-state" class="badge">PREVIEW</span>
+        </div>
         <div class="actions">
           <button id="save-pdf" class="primary" disabled>Save PDF ↓</button>
           <button id="share" class="secondary" disabled>Share ↗</button>
           <button id="print" class="secondary" disabled>Print</button>
         </div>
-        <article id="confirmation" class="invoice booking-document" aria-label="Generated booking confirmation"></article>
+        <article id="confirmation" class="invoice booking-document" aria-label="Generated booking confirmation">
+        </article>
       </section>
     </div>
   </main>
   <script type="module" src="../booking.js"></script>
 </body>
+
 </html>
