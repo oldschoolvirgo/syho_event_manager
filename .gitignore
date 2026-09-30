@@ -1,0 +1,5 @@
+node_modules/
+*.pdf
+test-results/
+.browser-check/
+preview.png

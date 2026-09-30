@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#100b1c">
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+  <title>Sing Your ❤️‍🔥 Out · Invoice</title>
+  <link rel="preload" href="../fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../hub.css">
+</head>
+
+<body>
+  <nav class="site-nav" aria-label="Main navigation">
+    <a class="site-name" href="../">SYHO Event Manager</a>
+    <div><a href="../invoice/" aria-current="page">Invoice</a><a href="../booking-confirmation/">Booking confirmation</a></div>
+  </nav>
+  <main>
+    <div class="workspace">
+      <section class="editor card" aria-label="Invoice details">
+        <div class="section-heading">
+          <h1>Invoice details</h1>
+        </div>
+        <form id="invoice-form">
+          <div class="field-pair invoice-meta"><label>Invoice number<input id="number" required maxlength="60"
+                autocapitalize="characters" spellcheck="false"></label><label>Invoice date<input id="date" type="date"
+                required></label></div>
+          <label>Bill to<textarea id="customer" rows="4" maxlength="1500" required
+              placeholder="Client or business name&#10;Street address&#10;City, state, ZIP"></textarea></label>
+          <div class="field-pair"><label>Billable hours<input id="hours" type="number" inputmode="numeric" min="1"
+                max="1000" step="1" value="1" required><small>Enter whole hours, rounded
+                up.</small></label><label>Hourly rate<input value="$100.00" readonly
+                aria-label="Fixed hourly rate"></label></div>
+          <details id="discounts-panel">
+            <summary>Discounts <span aria-hidden="true">＋</span></summary>
+            <label>Flat discount ($) <small>Optional · deducted once from the invoice total.</small>
+              <input id="discount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00">
+            </label>
+          </details>
+          <div class="estimate"><span>Invoice total</span><strong id="estimate">$100.00</strong></div>
+          <div class="options"><label><input id="include-address" type="checkbox"> Include mailing
+              address</label><label><input id="include-ein" type="checkbox"> Include EIN</label></div>
+          <p id="setup-hint" class="hint">First time? Add your contact and payment details in Settings below.</p>
+          <button class="primary" type="submit">Generate invoice <span aria-hidden="true">↗</span></button>
+        </form>
+        <details id="settings-panel">
+          <summary>Business & payment settings <span aria-hidden="true">＋</span></summary>
+          <p class="hint">Saved only in this browser. Enter these again on another device or after clearing browser
+            data.</p>
+          <form id="settings-form">
+            <label>Full name<input name="name" autocomplete="name" maxlength="120" required></label>
+            <div class="field-pair"><label>City / state<input name="city" maxlength="120"
+                  placeholder="Houston, TX"></label><label>Phone<input name="phone" type="tel" autocomplete="tel"
+                  maxlength="60"></label></div>
+            <label>Email<input name="email" type="email" autocomplete="email" maxlength="160"></label>
+            <label>Mailing address <small>Optional</small><textarea name="address" rows="3" maxlength="500"
+                autocomplete="street-address"></textarea></label>
+            <label>EIN <small>Optional</small><input name="ein" maxlength="30" placeholder="XX-XXXXXXX"></label>
+            <label>Zelle<input name="zelle" maxlength="200" placeholder="Phone number or email"></label>
+            <label>Venmo<input name="venmo" maxlength="100" placeholder="@username"></label>
+            <label>Cash App<input name="cashapp" maxlength="100" placeholder="$username"></label>
+            <label>PayPal<input name="paypal" maxlength="160" placeholder="Email or username"></label>
+            <button class="secondary" type="submit">Save settings on this device</button>
+          </form>
+        </details>
+        <p id="status" role="status" aria-live="polite"></p>
+      </section>
+      <section id="preview-area" class="preview-area" aria-label="Invoice preview">
+        <div class="preview-toolbar">
+          <div>
+            <h2>Your invoice</h2>
+          </div><span id="preview-state" class="badge">PREVIEW</span>
+        </div>
+        <div class="actions"><button id="save-pdf" class="primary" disabled>Save PDF ↓</button><button id="share"
+            class="secondary" disabled>Share invoice ↗</button><button id="print" class="secondary"
+            disabled>Print</button></div>
+        <article id="invoice" class="invoice" aria-label="Generated invoice"></article>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="../app.js"></script>
+</body>
+
+</html>

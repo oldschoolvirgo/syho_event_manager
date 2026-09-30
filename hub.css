@@ -1,0 +1,34 @@
+[hidden]{display:none!important}
+@media screen{body{min-height:100vh}}
+.site-nav{max-width:1200px;margin:auto;padding:24px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.site-nav a{color:#c5b8d8;text-decoration:none;font-size:14px;padding:8px 0}
+.site-nav .site-name{color:#faf7ff;font-size:18px;font-weight:750}
+.site-nav div{display:flex;gap:22px;flex-wrap:wrap}
+.site-nav a[aria-current=page]{color:var(--accent)}
+.site-nav a:hover{text-decoration:underline}
+.home{max-width:1000px;padding-top:80px}
+.home-heading{max-width:640px;margin-bottom:48px}
+.eyebrow{font-size:12px;letter-spacing:2px;font-weight:700;color:var(--purple)}
+.home h1{font-size:clamp(38px,7vw,64px);letter-spacing:-2px;color:#faf7ff;margin:20px 0}
+.home-heading>p:last-child{color:#c5b8d8;font-size:19px;line-height:1.6}
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.tool-card{display:flex;flex-direction:column;text-decoration:none;color:#faf7ff;padding:32px;transition:transform .15s,border-color .15s}
+.tool-card:hover{transform:translateY(-3px);border-color:var(--purple)}
+.tool-card h2{font-size:23px;line-height:1.4;margin:24px 0 12px}
+.tool-card h2 span{color:var(--accent)}
+.tool-card p{color:#c5b8d8;line-height:1.7;margin:0 0 32px}
+.tool-cta{color:var(--accent);font-weight:700;margin-top:auto}
+.home-note{font-size:13px;line-height:1.7;color:#b9adc9;max-width:600px;margin-top:32px}
+.booking-editor{position:static}
+.booking-document h2{font-size:19px;margin:12px 0 24px;line-height:1.4}
+.booking-document h3{font-size:12px;letter-spacing:1px;margin:26px 0 12px;border-bottom:1px solid #e6dcf0;padding-bottom:8px;break-after:avoid}
+.booking-document p{margin:0 0 12px;white-space:pre-wrap;orphans:3;widows:3}
+.booking-document ul{padding-left:20px;margin:0 0 16px}
+.booking-document li{margin-bottom:6px}
+.booking-detail{margin:0 0 7px!important;break-inside:avoid}
+.booking-document .booking-total{font-size:17px;border-top:1px solid #e6dcf0;padding-top:12px;margin-top:14px!important}
+.booking-duration{color:#b9adc9;font-size:13px;line-height:1.6;margin:0 0 18px}
+.booking-editor .options{margin-bottom:16px}
+.booking-editor input[type=checkbox]{flex-shrink:0}
+@media(max-width:650px){.tool-grid{grid-template-columns:1fr}.home{padding-top:36px}.home-heading{margin-bottom:30px}.site-nav{padding:16px 12px;gap:8px}.site-nav div{gap:16px}.tool-card{padding:26px}}
+@media print{.site-nav{display:none!important}.booking-document{font-size:10pt;line-height:1.5}.booking-document h3{break-after:avoid}.booking-document li{break-inside:avoid}}
